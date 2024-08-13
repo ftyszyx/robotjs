@@ -9,9 +9,8 @@
     "test:darwin:linux": "jasmine test/**/*.js",
     "test-keyboard": "node test/keyboard.js",
     "test:win32": "jasmine test/**/*.js",
-    "install": "prebuild-install || node-gyp rebuild",
-    "install-debug": "prebuild-install || node-gyp rebuild --debug",
-    "prebuild": "prebuild --all"
+    "build": "node-gyp configure &&node-gyp rebuild",
+    "clean": "node-gyp clean"
   },
   "repository": {
     "type": "git",
@@ -48,6 +47,6 @@
     "targetpractice": "0.0.7"
   },
   "dependencies": {
-    "nan": "^2.20.0"
+    "node-addon-api": "*"
   }
 }

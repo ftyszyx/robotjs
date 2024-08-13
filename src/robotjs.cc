@@ -1,6 +1,4 @@
-#include <node.h>
-#include <nan.h>
-#include <v8.h>
+#include <napi.h>
 #include <vector>
 #include "mouse.h"
 #include "deadbeef_rand.h"
@@ -11,25 +9,15 @@
 #include "snprintf.h"
 #include "microsleep.h"
 #if defined(USE_X11)
-	#include "xdisplay.h"
+#include "xdisplay.h"
 #endif
-
-using namespace v8;
 
 //Global delays.
 int mouseDelay = 10;
 int keyboardDelay = 10;
 
-/*
- __  __
-|  \/  | ___  _   _ ___  ___
-| |\/| |/ _ \| | | / __|/ _ \
-| |  | | (_) | |_| \__ \  __/
-|_|  |_|\___/ \__,_|___/\___|
 
-*/
-
-int CheckMouseButton(const char * const b, MMMouseButton * const button)
+int CheckMouseButton(const char* const b, MMMouseButton* const button)
 {
 	if (!button) return -1;
 
@@ -53,80 +41,57 @@ int CheckMouseButton(const char * const b, MMMouseButton * const button)
 	return 0;
 }
 
-NAN_METHOD(dragMouse)
-{
-	if (info.Length() < 2 || info.Length() > 3)
-	{
-		return Nan::ThrowError("Invalid number of arguments.");
-	}
 
-	const int32_t x = Nan::To<int32_t>(info[0]).FromJust();
-	const int32_t y = Nan::To<int32_t>(info[1]).FromJust();
+void node_dragMouse(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
+	if (info.Length() < 3 || !info[0].IsNumber() || !info[1].IsNumber()) {
+		Napi::TypeError::New(env, "Number expected").ThrowAsJavaScriptException();
+	}
+	Napi::Number x = info[0].As<Napi::Number>();
+	Napi::Number y = info[1].As<Napi::Number>();
+	Napi::Function callback = info[2].As<Napi::Function>();
 	MMMouseButton button = LEFT_BUTTON;
-
-	if (info.Length() == 3)
-	{
-		Nan::Utf8String bstr(info[2]);
-		const char * const b = *bstr;
-
-		switch (CheckMouseButton(b, &button))
-		{
-			case -1:
-				return Nan::ThrowError("Null pointer in mouse button code.");
-				break;
-			case -2:
-				return Nan::ThrowError("Invalid mouse button specified.");
-				break;
-		}
-	}
-
 	MMSignedPoint point;
 	point = MMSignedPointMake(x, y);
 	dragMouse(point, button);
 	microsleep(mouseDelay);
-
-	info.GetReturnValue().Set(Nan::New(1));
+	callback.Call(env.Global(), {});
 }
 
-NAN_METHOD(updateScreenMetrics)
-{
+void node_updateScreenMetrics(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	updateScreenMetrics();
-
-	info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_METHOD(moveMouse)
-{
-	if (info.Length() != 2)
-	{
-		return Nan::ThrowError("Invalid number of arguments.");
+
+void node_moveMouse(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
+	if (info.Length() < 2 || !info[0].IsNumber() || !info[1].IsNumber()) {
+		Napi::TypeError::New(env, "Number expected").ThrowAsJavaScriptException();
 	}
-
-	int32_t x = Nan::To<int32_t>(info[0]).FromJust();
-	int32_t y = Nan::To<int32_t>(info[1]).FromJust();
-
+	Napi::Number x = info[0].As<Napi::Number>();
+	Napi::Number y = info[1].As<Napi::Number>();
+	Napi::Function callback = info[2].As<Napi::Function>();
 	MMSignedPoint point;
-	point = MMSignedPointMake(x, y);
+	point = MMSignedPointMake(x.Int32Value(), y.Int32Value());
 	moveMouse(point);
 	microsleep(mouseDelay);
-
-	info.GetReturnValue().Set(Nan::New(1));
+	callback.Call(env.Global(), {});
 }
 
-NAN_METHOD(moveMouseSmooth)
-{
-	if (info.Length() > 3 || info.Length() < 2 )
-	{
-		return Nan::ThrowError("Invalid number of arguments.");
+void node_moveMouseSmooth(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
+	if (info.Length() < 2 || !info[0].IsNumber() || !info[1].IsNumber()) {
+		Napi::TypeError::New(env, "Number expected").ThrowAsJavaScriptException();
 	}
-	size_t x = Nan::To<int32_t>(info[0]).FromJust();
-	size_t y = Nan::To<int32_t>(info[1]).FromJust();
-
+	Napi::Number x = info[0].As<Napi::Number>();
+	Napi::Number y = info[1].As<Napi::Number>();
+	Napi::Function callback = info[2].As<Napi::Function>();
 	MMPoint point;
-	point = MMPointMake(x, y);
+	point = MMPointMake(x.Int32Value(), y.Int32Value());
 	if (info.Length() == 3)
 	{
-		size_t speed = Nan::To<int32_t>(info[2]).FromJust();
+		size_t speed = info[2].As<Napi::Number>();
 		smoothlyMoveMouse(point, speed);
 	}
 	else
@@ -134,151 +99,94 @@ NAN_METHOD(moveMouseSmooth)
 		smoothlyMoveMouse(point, 3.0);
 	}
 	microsleep(mouseDelay);
-
-	info.GetReturnValue().Set(Nan::New(1));
+	callback.Call(env.Global(), {});
 }
 
-NAN_METHOD(getMousePos)
-{
+Napi::Object node_getMousePos(Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	MMPoint pos = getMousePos();
-
-	//Return object with .x and .y.
-	Local<Object> obj = Nan::New<Object>();
-	Nan::Set(obj, Nan::New("x").ToLocalChecked(), Nan::New((int)pos.x));
-	Nan::Set(obj, Nan::New("y").ToLocalChecked(), Nan::New((int)pos.y));
-	info.GetReturnValue().Set(obj);
+	Napi::Object obj = Napi::Object::New(env);
+	obj.Set("x", Napi::Number::New(env, pos.x));
+	obj.Set("y", Napi::Number::New(env, pos.y));
+	return obj;
 }
 
-NAN_METHOD(mouseClick)
-{
+void node_mouseClick(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	MMMouseButton button = LEFT_BUTTON;
 	bool doubleC = false;
+	if ((info.Length() >= 1)) {
+		if (!info[0].IsString()) {
+			Napi::TypeError::New(env, "args error").ThrowAsJavaScriptException();
+		}
+		Napi::String arg1 = info[0].As<Napi::String>();
 
-	if (info.Length() > 0)
-	{
-		v8::String::Utf8Value bstr(v8::Isolate::GetCurrent(), Nan::To<v8::String>(info[0]).ToLocalChecked());
-		const char * const b = *bstr;
-
-		switch (CheckMouseButton(b, &button))
-		{
-			case -1:
-				return Nan::ThrowError("Null pointer in mouse button code.");
-				break;
-			case -2:
-				return Nan::ThrowError("Invalid mouse button specified.");
-				break;
+		if (arg1.Utf8Value() == "right") {
+			button = RIGHT_BUTTON;
 		}
 	}
-
-	if (info.Length() == 2)
-	{
-		doubleC = Nan::To<bool>(info[1]).FromJust();
+	if (info.Length() >= 2) {
+		if (!info[1].IsBoolean()) {
+			Napi::TypeError::New(env, "args error").ThrowAsJavaScriptException();
+		}
+		Napi::Boolean arg2 = info[1].As<Napi::Boolean>();
+		doubleC = arg2.Value();
 	}
-	else if (info.Length() > 2)
-	{
-		return Nan::ThrowError("Invalid number of arguments.");
-	}
-
-	if (!doubleC)
-	{
-		clickMouse(button);
-	}
-	else
-	{
+	if (doubleC) {
 		doubleClick(button);
 	}
-
+	else {
+		clickMouse(button);
+	}
 	microsleep(mouseDelay);
-
-	info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_METHOD(mouseToggle)
-{
+MMMouseButton etMouseButton(const Napi::String& arg) {
+	std::string str = arg.Utf8Value();
+	if (str == "right") {
+		return RIGHT_BUTTON;
+	}
+	else if (str == "middle") {
+		return CENTER_BUTTON;
+	}
+	return LEFT_BUTTON;
+}
+
+void node_mouseToggle(Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	MMMouseButton button = LEFT_BUTTON;
 	bool down = false;
-
-	if (info.Length() > 0)
-	{
-		char *d;
-
-		Nan::Utf8String dstr(info[0]);
-		d = *dstr;
-
-		if (strcmp(d, "down") == 0)
-		{
-			down = true;
+	if (info.Length() >= 1) {
+		if (!info[0].IsString()) {
+			Napi::TypeError::New(env, "args error").ThrowAsJavaScriptException();
 		}
-		else if (strcmp(d, "up") == 0)
-		{
-			down = false;
-		}
-		else
-		{
-			return Nan::ThrowError("Invalid mouse button state specified.");
-		}
+		down = info[0].As<Napi::String>().Utf8Value() == "down";
 	}
-
-	if (info.Length() == 2)
-	{
-		Nan::Utf8String bstr(info[1]);
-		const char * const b = *bstr;
-
-		switch (CheckMouseButton(b, &button))
-		{
-			case -1:
-				return Nan::ThrowError("Null pointer in mouse button code.");
-				break;
-			case -2:
-				return Nan::ThrowError("Invalid mouse button specified.");
-				break;
+	if (info.Length() >= 2) {
+		if (!info[1].IsString()) {
+			Napi::TypeError::New(env, "args error").ThrowAsJavaScriptException();
 		}
+		button = getMouseButton(info[1].As<Napi::String>());
 	}
-	else if (info.Length() > 2)
-	{
-		return Nan::ThrowError("Invalid number of arguments.");
-	}
-
 	toggleMouse(down, button);
 	microsleep(mouseDelay);
-
-	info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_METHOD(setMouseDelay)
-{
-	if (info.Length() != 1)
-	{
-		return Nan::ThrowError("Invalid number of arguments.");
+void node_setMouseDelay(Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
+	if (info.Length() != 1 || !info[0].IsNumber()) {
+		Napi::TypeError::New(env, "args error").ThrowAsJavaScriptException();
 	}
-
-	mouseDelay = Nan::To<int32_t>(info[0]).FromJust();
-
-	info.GetReturnValue().Set(Nan::New(1));
+	mouseDelay = info[0].As<Napi::Number>().Int32Value();
 }
 
-NAN_METHOD(scrollMouse)
-{
-	if (info.Length() != 2)
-	{
-    	return Nan::ThrowError("Invalid number of arguments.");
-	}
-
-	int x = Nan::To<int32_t>(info[0]).FromJust();
-	int y = Nan::To<int32_t>(info[1]).FromJust();
-
-	scrollMouse(x, y);
-	microsleep(mouseDelay);
-
-	info.GetReturnValue().Set(Nan::New(1));
-}
 /*
  _  __          _                         _
 | |/ /___ _   _| |__   ___   __ _ _ __ __| |
 | ' // _ \ | | | '_ \ / _ \ / _` | '__/ _` |
 | . \  __/ |_| | |_) | (_) | (_| | | | (_| |
 |_|\_\___|\__, |_.__/ \___/ \__,_|_|  \__,_|
-          |___/
+		  |___/
 */
 struct KeyNames
 {
@@ -379,7 +287,7 @@ static KeyNames key_names[] =
 	{ NULL,               K_NOT_A_KEY } /* end marker */
 };
 
-int CheckKeyCodes(char* k, MMKeyCode *key)
+int CheckKeyCodes(const char* k, MMKeyCode* key)
 {
 	if (!key) return -1;
 
@@ -410,7 +318,7 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 	return 0;
 }
 
-int CheckKeyFlags(char* f, MMKeyFlags* flags)
+int CheckKeyFlags(const char* f, MMKeyFlags* flags)
 {
 	if (!flags) return -1;
 
@@ -418,19 +326,19 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	{
 		*flags = MOD_ALT;
 	}
-	else if(strcmp(f, "command") == 0)
+	else if (strcmp(f, "command") == 0)
 	{
 		*flags = MOD_META;
 	}
-	else if(strcmp(f, "control") == 0 || strcmp(f, "right_control") == 0 || strcmp(f, "left_control") == 0)
+	else if (strcmp(f, "control") == 0 || strcmp(f, "right_control") == 0 || strcmp(f, "left_control") == 0)
 	{
 		*flags = MOD_CONTROL;
 	}
-	else if(strcmp(f, "shift") == 0 || strcmp(f, "right_shift") == 0)
+	else if (strcmp(f, "shift") == 0 || strcmp(f, "right_shift") == 0)
 	{
 		*flags = MOD_SHIFT;
 	}
-	else if(strcmp(f, "none") == 0)
+	else if (strcmp(f, "none") == 0)
 	{
 		*flags = MOD_NONE;
 	}
@@ -442,221 +350,107 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	return 0;
 }
 
-int GetFlagsFromString(v8::Local<v8::Value> value, MMKeyFlags* flags)
-{
-	v8::String::Utf8Value fstr(v8::Isolate::GetCurrent(), Nan::To<v8::String>(value).ToLocalChecked());
-	return CheckKeyFlags(*fstr, flags);
-}
-
-int GetFlagsFromValue(v8::Local<v8::Value> value, MMKeyFlags* flags)
-{
-	if (!flags) return -1;
-
-	//Optionally allow an array of flag strings to be passed.
-	if (value->IsArray())
-	{
-		v8::Local<v8::Array> a = v8::Local<v8::Array>::Cast(value);
-		for (uint32_t i = 0; i < a->Length(); i++)
-		{
-		  if (Nan::Has(a, i).FromJust()) {
-                v8::Local<v8::Value> v(Nan::Get(a, i).ToLocalChecked());
-                if (!v->IsString()) return -2;
-
-                MMKeyFlags f = MOD_NONE;
-                const int rv = GetFlagsFromString(v, &f);
-                if (rv) return rv;
-
-                *flags = (MMKeyFlags)(*flags | f);
-			}
+MMKeyCode getKeyCodeFromArg(Napi::CallbackInfo& info, int index) {
+	Napi::Env env = info.Env();
+	MMKeyCode key = -1;
+	if (info.Length() >= index + 1) {
+		if (!info[0].IsString()) {
+			Napi::TypeError::New(env, "args error").ThrowAsJavaScriptException();
 		}
-		return 0;
+		Napi::String keyStr = info[0].As<Napi::String>();
+		int check = CheckKeyCodes(keyStr.Utf8Value().c_str(), &key);
+		if (check == -1)
+		{
+			Napi::TypeError::New(env, "Null pointer in key code.").ThrowAsJavaScriptException();
+		}
+		if (check == -2) {
+			Napi::TypeError::New(env, "Invalid key code specified.").ThrowAsJavaScriptException();
+		}
 	}
-
-	//If it's not an array, it should be a single string value.
-	return GetFlagsFromString(value, flags);
+	return key;
 }
 
-NAN_METHOD(keyTap)
-{
+MMKeyFlags getKeyModifiedByArg(Napi::CallbackInfo& info, int index) {
+	Napi::Env env = info.Env();
 	MMKeyFlags flags = MOD_NONE;
-	MMKeyCode key;
-
-	char *k;
-
-	v8::String::Utf8Value kstr(v8::Isolate::GetCurrent(), Nan::To<v8::String>(info[0]).ToLocalChecked());
-	k = *kstr;
-
-	switch (info.Length())
-	{
-		case 2:
-			switch (GetFlagsFromValue(info[1], &flags))
-			{
-				case -1:
-					return Nan::ThrowError("Null pointer in key flag.");
-					break;
-				case -2:
-					return Nan::ThrowError("Invalid key flag specified.");
-					break;
-			}
-			break;
-		case 1:
-			break;
-		default:
-			return Nan::ThrowError("Invalid number of arguments.");
-	}
-
-	switch(CheckKeyCodes(k, &key))
-	{
-		case -1:
-			return Nan::ThrowError("Null pointer in key code.");
-			break;
-		case -2:
-			return Nan::ThrowError("Invalid key code specified.");
-			break;
-		default:
-			toggleKeyCode(key, true, flags);
-			microsleep(keyboardDelay);
-			toggleKeyCode(key, false, flags);
-			microsleep(keyboardDelay);
-			break;
-	}
-
-	info.GetReturnValue().Set(Nan::New(1));
-}
-
-
-NAN_METHOD(keyToggle)
-{
-	MMKeyFlags flags = MOD_NONE;
-	MMKeyCode key;
-
-	bool down;
-	char *k;
-
-	//Get arguments from JavaScript.
-	Nan::Utf8String kstr(info[0]);
-
-	//Convert arguments to chars.
-	k = *kstr;
-
-	//Check and confirm number of arguments.
-	switch (info.Length())
-	{
-		case 3:
-			//Get key modifier.
-			switch (GetFlagsFromValue(info[2], &flags))
-			{
-				case -1:
-					return Nan::ThrowError("Null pointer in key flag.");
-					break;
-				case -2:
-					return Nan::ThrowError("Invalid key flag specified.");
-					break;
-			}
-			break;
-		case 2:
-			break;
-		default:
-			return Nan::ThrowError("Invalid number of arguments.");
-	}
-
-	//Get down value if provided.
-	if (info.Length() > 1)
-	{
-		char *d;
-
-		Nan::Utf8String dstr(info[1]);
-		d = *dstr;
-
-		if (strcmp(d, "down") == 0)
-		{
-			down = true;
+	if (info.Length() >= index + 1) {
+		if (!info[1].IsString()) {
+			Napi::TypeError::New(env, "args error").ThrowAsJavaScriptException();
 		}
-		else if (strcmp(d, "up") == 0)
+		Napi::String modify_str = info[1].As<Napi::String>();
+		int check_res = CheckKeyFlags(modify_str.Utf8Value().c_str(), &flags);
+		if (check_res == -1)
 		{
-			down = false;
+			Napi::TypeError::New(env, "Null pointer in key code.").ThrowAsJavaScriptException();
 		}
-		else
-		{
-			return Nan::ThrowError("Invalid key state specified.");
+		if (check_res == -2) {
+			Napi::TypeError::New(env, "Invalid key code specified.").ThrowAsJavaScriptException();
 		}
 	}
-
-	//Get the actual key.
-	switch(CheckKeyCodes(k, &key))
-	{
-		case -1:
-			return Nan::ThrowError("Null pointer in key code.");
-			break;
-		case -2:
-			return Nan::ThrowError("Invalid key code specified.");
-			break;
-		default:
-			toggleKeyCode(key, down, flags);
-			microsleep(keyboardDelay);
-	}
-
-	info.GetReturnValue().Set(Nan::New(1));
+	return flags;
 }
 
-NAN_METHOD(unicodeTap)
-{
-	size_t value = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
-
-	if (value != 0) {
-		unicodeTap(value);
-
-		info.GetReturnValue().Set(Nan::New(1));
-	} else {
-		return Nan::ThrowError("Invalid character typed.");
+void GetStrByArg(Napi::CallbackInfo& info, int index, char* str) {
+	Napi::Env env = info.Env();
+	if (info.Length() >= index + 1) {
+		if (!info[index].IsString()) {
+			Napi::TypeError::New(env, "args error").ThrowAsJavaScriptException();
+		}
+		strcpy(str, info[index].As<Napi::String>().Utf8Value().c_str());
 	}
 }
 
-NAN_METHOD(typeString)
-{
-	if (info.Length() > 0) {
-		char *str;
-		Nan::Utf8String string(info[0]);
-
-		str = *string;
-
-		typeStringDelayed(str, 0);
-
-		info.GetReturnValue().Set(Nan::New(1));
-	} else {
-		return Nan::ThrowError("Invalid number of arguments.");
+void CheckCallback(Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
+	if (info.Length() > 1 && info[info.Length() - 1].IsFunction()) {
+		Napi::Function cb = info[info.Length() - 1].As<Napi::Function>();
+		cb.Call(env.Global(), {});
 	}
 }
 
-NAN_METHOD(typeStringDelayed)
-{
-	if (info.Length() > 0) {
-		char *str;
-		Nan::Utf8String string(info[0]);
 
-		str = *string;
-
-	size_t cpm = Nan::To<int32_t>(info[1]).FromJust();
-
-		typeStringDelayed(str, cpm);
-
-		info.GetReturnValue().Set(Nan::New(1));
-	} else {
-		return Nan::ThrowError("Invalid number of arguments.");
-	}
+void node_keytap(Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
+	MMKeyCode key = getKeyCodeFromArg(info, 0);
+	MMKeyFlags flags = getKeyModifiedByArg(info, 1);
+	toggleKeyCode(key, true, flags);
+	microsleep(keyboardDelay);
+	toggleKeyCode(key, false, flags);
+	microsleep(keyboardDelay);
+	CheckCallback(info);
 }
 
-NAN_METHOD(setKeyboardDelay)
-{
-	if (info.Length() != 1)
-	{
-		return Nan::ThrowError("Invalid number of arguments.");
+void node_keyToggle(Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
+	MMKeyCode key = getKeyCodeFromArg(info, 0);
+	MMKeyFlags flags = getKeyModifiedByArg(info, 2);
+	bool down = false;
+	char down_arg[100] = "";
+	GetStrByArg(info, 1, down_arg);
+	if (strcmp(down_arg, "down")) {
+		down = true;
 	}
-
-	keyboardDelay = Nan::To<int32_t>(info[0]).FromJust();
-
-	info.GetReturnValue().Set(Nan::New(1));
+	toggleKeyCode(key, down, flags);
+	microsleep(keyboardDelay);
+	CheckCallback(info);
 }
+
+void node_typeString(Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
+	char str[1000] = "";
+	GetStrByArg(info, 0, str);
+	typeStringDelayed(str, 0);
+	CheckCallback(info);
+}
+
+void node_SetKeyboardDelay(Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
+	if (info.Length() != 1 || !info[0].IsNumber()) {
+		Napi::TypeError::New(env, "args error").ThrowAsJavaScriptException();
+	}
+	keyboardDelay = info[0].As<Napi::Number>().Int32Value();
+}
+
 
 /*
   ____
@@ -679,256 +473,30 @@ void padHex(MMRGBHex color, char* hex)
 	snprintf(hex, 7, "%06x", color);
 }
 
-NAN_METHOD(getPixelColor)
-{
-	if (info.Length() != 2)
-	{
-		return Nan::ThrowError("Invalid number of arguments.");
-	}
-
-	MMBitmapRef bitmap;
-	MMRGBHex color;
-
-	size_t x = Nan::To<int32_t>(info[0]).FromJust();
-	size_t y = Nan::To<int32_t>(info[1]).FromJust();
-
-	if (!pointVisibleOnMainDisplay(MMPointMake(x, y)))
-	{
-		return Nan::ThrowError("Requested coordinates are outside the main screen's dimensions.");
-	}
-
-	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
-
-	color = MMRGBHexAtPoint(bitmap, 0, 0);
-
-	char hex[7];
-
-	padHex(color, hex);
-
-	destroyMMBitmap(bitmap);
-
-	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
-}
-
-NAN_METHOD(getScreenSize)
-{
-	//Get display size.
+Napi::Object node_getScreenSize(Napi::CallbackInfo& info) {
 	MMSize displaySize = getMainDisplaySize();
-
-	//Create our return object.
-	Local<Object> obj = Nan::New<Object>();
-	Nan::Set(obj, Nan::New("width").ToLocalChecked(), Nan::New<Number>(displaySize.width));
-	Nan::Set(obj, Nan::New("height").ToLocalChecked(), Nan::New<Number>(displaySize.height));
-
-	//Return our object with .width and .height.
-	info.GetReturnValue().Set(obj);
+	Napi::Env env = info.Env();
+	Napi::Object obj = Napi::Object::New(env);
+	obj.Set("width", Napi::Number::New(env, displaySize.width));
+	obj.Set("height", Napi::Number::New(env, displaySize.height));
+	return obj;
 }
 
-NAN_METHOD(getXDisplayName)
-{
-	#if defined(USE_X11)
-	const char* display = getXDisplay();
-	info.GetReturnValue().Set(Nan::New<String>(display).ToLocalChecked());
-	#else
-	Nan::ThrowError("getXDisplayName is only supported on Linux");
-	#endif
+Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
+	exports.Set(Napi::String::New(env, "dragMouse"), Napi::Function::New(env, node_dragMouse));
+	exports.Set(Napi::String::New(env, "updateScreenMetrics"), Napi::Function::New(env, node_updateScreenMetrics));
+	exports.Set(Napi::String::New(env, "moveMouse"), Napi::Function::New(env, node_moveMouse));
+	exports.Set(Napi::String::New(env, "moveMouseSmooth"), Napi::Function::New(env, node_moveMouseSmooth));
+	exports.Set(Napi::String::New(env, "getMousePos"), Napi::Function::New(env, node_getMousePos));
+	exports.Set(Napi::String::New(env, "mouseClick"), Napi::Function::New(env, node_mouseClick));
+	exports.Set(Napi::String::New(env, "mouseToggle"), Napi::Function::New(env, node_mouseToggle));
+	exports.Set(Napi::String::New(env, "setMouseDelay"), Napi::Function::New(env, node_setMouseDelay));
+	exports.Set(Napi::String::New(env, "keyTap"), Napi::Function::New(env, node_keyTap));
+	exports.Set(Napi::String::New(env, "keyToggle"), Napi::Function::New(env, node_keyToggle));
+	exports.Set(Napi::String::New(env, "typeString"), Napi::Function::New(env, node_typeString));
+	exports.Set(Napi::String::New(env, "setKeyboardDelay"), Napi::Function::New(env, node_SetKeyboardDelay));
+	exports.Set(Napi::String::New(env, "getScreenSize"), Napi::Function::New(env, node_getScreenSize));
+	return exports;
 }
+NODE_API_MODULE(robotjs, InitAll)
 
-NAN_METHOD(setXDisplayName)
-{
-	#if defined(USE_X11)
-	Nan::Utf8String string(info[0]);
-	setXDisplay(*string);
-	info.GetReturnValue().Set(Nan::New(1));
-	#else
-	Nan::ThrowError("setXDisplayName is only supported on Linux");
-	#endif
-}
-
-NAN_METHOD(captureScreen)
-{
-	size_t x;
-	size_t y;
-	size_t w;
-	size_t h;
-
-	//If user has provided screen coords, use them!
-	if (info.Length() == 4)
-	{
-		//TODO: Make sure requested coords are within the screen bounds, or we get a seg fault.
-		// 		An error message is much nicer!
-
-		x = Nan::To<int32_t>(info[0]).FromJust();
-		y = Nan::To<int32_t>(info[1]).FromJust();
-		w = Nan::To<int32_t>(info[2]).FromJust();
-		h = Nan::To<int32_t>(info[3]).FromJust();
-	}
-	else
-	{
-		//We're getting the full screen.
-		x = 0;
-		y = 0;
-
-		//Get screen size.
-		MMSize displaySize = getMainDisplaySize();
-		w = displaySize.width;
-		h = displaySize.height;
-	}
-
-	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, w, h));
-
-	uint32_t bufferSize = bitmap->bytewidth * bitmap->height;
-	Local<Object> buffer = Nan::NewBuffer((char*)bitmap->imageBuffer, bufferSize, destroyMMBitmapBuffer, NULL).ToLocalChecked();
-
-	Local<Object> obj = Nan::New<Object>();
-	Nan::Set(obj, Nan::New("width").ToLocalChecked(), Nan::New<Number>(bitmap->width));
-	Nan::Set(obj, Nan::New("height").ToLocalChecked(), Nan::New<Number>(bitmap->height));
-	Nan::Set(obj, Nan::New("byteWidth").ToLocalChecked(), Nan::New<Number>(bitmap->bytewidth));
-	Nan::Set(obj, Nan::New("bitsPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bitsPerPixel));
-	Nan::Set(obj, Nan::New("bytesPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bytesPerPixel));
-	Nan::Set(obj, Nan::New("image").ToLocalChecked(), buffer);
-
-	info.GetReturnValue().Set(obj);
-}
-
-/*
- ____  _ _
-| __ )(_) |_ _ __ ___   __ _ _ __
-|  _ \| | __| '_ ` _ \ / _` | '_ \
-| |_) | | |_| | | | | | (_| | |_) |
-|____/|_|\__|_| |_| |_|\__,_| .__/
-                            |_|
- */
-
-class BMP
-{
-	public:
-		size_t width;
-		size_t height;
-		size_t byteWidth;
-		uint8_t bitsPerPixel;
-		uint8_t bytesPerPixel;
-		uint8_t *image;
-};
-
-//Convert object from Javascript to a C++ class (BMP).
-BMP buildBMP(Local<Object> info)
-{
-	Local<Object> obj = Nan::To<v8::Object>(info).ToLocalChecked();
-
-	BMP img;
-
-	img.width = Nan::Get(obj, Nan::New("width").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust();
-	img.height = Nan::Get(obj, Nan::New("height").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust();
-	img.byteWidth = Nan::Get(obj, Nan::New("byteWidth").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust();
-	img.bitsPerPixel = Nan::Get(obj, Nan::New("bitsPerPixel").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust();
-	img.bytesPerPixel = Nan::Get(obj, Nan::New("bytesPerPixel").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust();
-
-	char* buf = node::Buffer::Data(Nan::Get(obj, Nan::New("image").ToLocalChecked()).ToLocalChecked());
-
-	//Convert the buffer to a uint8_t which createMMBitmap requires.
-	img.image = (uint8_t *)malloc(img.byteWidth * img.height);
-	memcpy(img.image, buf, img.byteWidth * img.height);
-
-	return img;
- }
-
-NAN_METHOD(getColor)
-{
-	MMBitmapRef bitmap;
-	MMRGBHex color;
-
-	size_t x = Nan::To<int32_t>(info[1]).FromJust();
-	size_t y = Nan::To<int32_t>(info[2]).FromJust();
-
-	//Get our image object from JavaScript.
-	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
-
-	//Create the bitmap.
-	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
-
-	// Make sure the requested pixel is inside the bitmap.
-	if (!MMBitmapPointInBounds(bitmap, MMPointMake(x, y)))
-	{
-		return Nan::ThrowError("Requested coordinates are outside the bitmap's dimensions.");
-	}
-
-	color = MMRGBHexAtPoint(bitmap, x, y);
-
-	char hex[7];
-
-	padHex(color, hex);
-
-	destroyMMBitmap(bitmap);
-
-	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
-
-}
-
-NAN_MODULE_INIT(InitAll)
-{
-	Nan::Set(target, Nan::New("dragMouse").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(dragMouse)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("updateScreenMetrics").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(updateScreenMetrics)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("moveMouse").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouse)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("moveMouseSmooth").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouseSmooth)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("getMousePos").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(getMousePos)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("mouseClick").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(mouseClick)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("mouseToggle").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(mouseToggle)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("scrollMouse").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(scrollMouse)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("setMouseDelay").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(setMouseDelay)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("keyTap").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(keyTap)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("keyToggle").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(keyToggle)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("unicodeTap").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(unicodeTap)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("typeString").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(typeString)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("typeStringDelayed").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(typeStringDelayed)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("setKeyboardDelay").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(setKeyboardDelay)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("getPixelColor").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(getPixelColor)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("captureScreen").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(captureScreen)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("getColor").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(getColor)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("getXDisplayName").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(getXDisplayName)).ToLocalChecked());
-
-	Nan::Set(target, Nan::New("setXDisplayName").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(setXDisplayName)).ToLocalChecked());
-}
-
-NODE_MODULE(robotjs, InitAll)

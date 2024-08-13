@@ -89,15 +89,7 @@ void node_moveMouseSmooth(const Napi::CallbackInfo& info) {
 	Napi::Function callback = info[2].As<Napi::Function>();
 	MMPoint point;
 	point = MMPointMake(x.Int32Value(), y.Int32Value());
-	if (info.Length() == 3)
-	{
-		size_t speed = info[2].As<Napi::Number>();
-		smoothlyMoveMouse(point, speed);
-	}
-	else
-	{
 		smoothlyMoveMouse(point, 3.0);
-	}
 	microsleep(mouseDelay);
 	callback.Call(env.Global(), {});
 }
@@ -141,7 +133,7 @@ void node_mouseClick(const Napi::CallbackInfo& info) {
 	microsleep(mouseDelay);
 }
 
-MMMouseButton etMouseButton(const Napi::String& arg) {
+MMMouseButton getMouseButton(const Napi::String& arg) {
 	std::string str = arg.Utf8Value();
 	if (str == "right") {
 		return RIGHT_BUTTON;

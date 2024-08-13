@@ -491,7 +491,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
 	exports.Set(Napi::String::New(env, "mouseClick"), Napi::Function::New(env, node_mouseClick));
 	exports.Set(Napi::String::New(env, "mouseToggle"), Napi::Function::New(env, node_mouseToggle));
 	exports.Set(Napi::String::New(env, "setMouseDelay"), Napi::Function::New(env, node_setMouseDelay));
-	exports.Set(Napi::String::New(env, "keyTap"), Napi::Function::New(env, node_keyTap));
+	exports.Set(Napi::String::New(env, "keyTap"), Napi::Function::New(env, node_keytap));
 	exports.Set(Napi::String::New(env, "keyToggle"), Napi::Function::New(env, node_keyToggle));
 	exports.Set(Napi::String::New(env, "typeString"), Napi::Function::New(env, node_typeString));
 	exports.Set(Napi::String::New(env, "setKeyboardDelay"), Napi::Function::New(env, node_SetKeyboardDelay));

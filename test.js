@@ -7,5 +7,9 @@ var robot = require("./index");
 // console.log(robot.getMousePos());
 
 //test keyboard
-robot.typeString("Hello World");
+robot.moveMouse(353, 327);
+robot.mouseClick("left", true);
+robot.typeString("sss");
+robot.keyTap("enter");
+robot.typeString("abcdefghijklmnopqrstuvwxyz");
 robot.keyTap("enter");

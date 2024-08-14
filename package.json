@@ -5,9 +5,7 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "test:darwin:linux": "jasmine test/**/*.js",
-    "test-keyboard": "node test/keyboard.js",
-    "test": "jasmine test/**/*.js",
+    "test": "node test.js",
     "build": "node-gyp configure &&node-gyp rebuild",
     "clean": "node-gyp clean"
   },
@@ -39,11 +37,7 @@
     "url": "https://github.com/octalmage/robotjs/issues"
   },
   "homepage": "https://github.com/octalmage/robotjs",
-  "devDependencies": {
-    "jasmine": "^5.2.0",
-    "tape": "^4.8.0",
-    "targetpractice": "0.0.7"
-  },
+  "devDependencies": {},
   "dependencies": {
     "node-addon-api": "*"
   }

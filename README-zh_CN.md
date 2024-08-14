@@ -3,7 +3,7 @@
 # 说明
 
 这个项目是从 robot.js：https://robotjs.io/ fork 过来的。
-主要目的下：
+主要目的如下：
 
 1、使用 node-api 将 c++接口重新封装。
 原来的 robot.js c++的封装是使用 v8 api。不同的 node.js 版本兼容 性不好。切换 node.js 版本需要重新编译。

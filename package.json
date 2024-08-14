@@ -1,5 +1,5 @@
 {
-  "name": "robotjs",
+  "name": "robotjs2",
   "version": "0.6.0",
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
@@ -7,29 +7,25 @@
   "scripts": {
     "test": "node test.js",
     "build": "node-gyp configure &&node-gyp rebuild",
-    "clean": "node-gyp clean"
+    "clean": "node-gyp clean",
+    "install": "node-pre-gyp install --fallback-to-build",
+    "pub": "npm publish --registry=https://registry.npmjs.org"
+  },
+  "binary": {
+    "module_name": "robotjs2",
+    "module_path": "./build/Release/",
+    "package_name": "{module_name}-v{version}-napi-v{napi-build-version}-${platform}-${arch}.tar.gz",
+    "host": "https://github.com",
+    "remote_path": "/ftyszyx/robotjs/releases/download/v{version}",
+    "napi_versions": [
+      8
+    ]
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/octalmage/robotjs.git"
   },
-  "keywords": [
-    "Automation",
-    "GUI",
-    "mouse",
-    "keyboard",
-    "screenshot",
-    "image",
-    "pixel",
-    "desktop",
-    "robotjs",
-    "screen",
-    "recognition",
-    "autohotkey",
-    "machine",
-    "learning",
-    "color"
-  ],
+  "keywords": [],
   "author": "Jason Stallings",
   "license": "MIT",
   "gypfile": true,
@@ -37,8 +33,11 @@
     "url": "https://github.com/octalmage/robotjs/issues"
   },
   "homepage": "https://github.com/octalmage/robotjs",
-  "devDependencies": {},
   "dependencies": {
+    "@mapbox/node-pre-gyp": "^1.0.11",
     "node-addon-api": "*"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.1674.0"
   }
 }

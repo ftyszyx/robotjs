@@ -1,4 +1,7 @@
+#define NAPI_VERSION 8
+// v12.22.0+, v14.17.0+, v15.12.0+, 16.0.0 and all later versions
 #include <napi.h>
+
 #include <vector>
 #include "mouse.h"
 #include "deadbeef_rand.h"

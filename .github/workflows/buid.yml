@@ -3,7 +3,7 @@ on:
 name: build
 permissions:
   contents: write
-jos:
+jobs:
   build:
     run-on: ${{ matrix.os }}
     strategy:

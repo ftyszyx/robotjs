@@ -1,5 +1,5 @@
 {
-  "name": "robotjs",
+  "name": "robotjs_addon",
   "version": "0.6.0",
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
@@ -7,17 +7,16 @@
   "scripts": {
     "test": "node test.js",
     "build": "node-gyp configure &&node-gyp rebuild",
+    "install": "node-pre-gyp install --fallback-to-build",
+    "pack": "node-pre-gyp package",
     "clean": "node-gyp clean"
   },
   "binary": {
-    "module_name": "robotjs",
-    "module_path": "./build/Release/",
-    "package_name": "{module_name}-v{version}-napi-v{napi-build-version}-${platform}-${arch}.tar.gz",
+    "module_name": "robotjs_addon",
+    "module_path": "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}",
+    "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz",
     "host": "https://github.com",
-    "remote_path": "/ftyszyx/robotjs/releases/download/v{version}",
-    "napi_versions": [
-      8
-    ]
+    "remote_path": "/ftyszyx/robotjs/releases/download/{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz"
   },
   "repository": {
     "type": "git",
@@ -32,9 +31,8 @@
   },
   "homepage": "https://github.com/octalmage/robotjs",
   "dependencies": {
-    "node-addon-api": "*"
-  },
-  "devDependencies": {
+    "node-addon-api": "*",
     "@mapbox/node-pre-gyp": "^1.0.11"
-  }
+  },
+  "devDependencies": {}
 }

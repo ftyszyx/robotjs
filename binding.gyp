@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "target_name": "robotjs",
+      "target_name": "robotjs_addon",
       "include_dirs": [],
       "dependencies": [
         "<!(node -p \"require('node-addon-api').targets\"):node_addon_api"
@@ -72,6 +72,21 @@
         "src/screengrab.c",
         "src/snprintf.c",
         "src/MMBitmap.c"
+      ]
+    },
+    {
+      "target_name": "action_after_build",
+      "type": "none",
+      "dependencies": [
+        "robotjs_addon"
+      ],
+      "copies": [
+        {
+          "files": [
+            "<(PRODUCT_DIR)/<(module_name).node"
+          ],
+          "destination": "<(module_path)"
+        }
       ]
     }
   ]

@@ -6,3 +6,62 @@ on:
       - master
     tags:
       - "*"
+  env:
+    FORCE_COLOR: 1
+    jos:
+      build:
+        run-on: ${{ matrix.os }}
+        strategy:
+          matrix:
+            os: [ubuntu-latest, windows-latest, macos-latest]
+            host: [x64]
+            target: [x64]
+            node: [18]
+            include:
+              - os: windows-latest
+                host: x86
+                target: x86
+                node: 18
+              - os: macos-m1
+                host: arm64
+                target: arm64
+                node: 18
+        name: os=${{ matrix.os }}  host=${{ matrix.host }}, target=${{ matrix.target }}
+        steps:
+          - uses: actions/checkout@v4
+          - uses: actions/setup-node@v4
+            with:
+              node-version: ${{ matrix.node }}
+              architecture: ${{ matrix.host }}
+
+          - name: add setuptools for python 3.12
+            if: matrix.os != 'macos-m1'
+            run: pip install setuptools
+
+          - name: Add msbuild to PATH
+            uses: microsoft/setup-msbuild@v1.3
+            if: contains(matrix.os, 'windows')
+            with:
+              msbuild-architecture: ${{ matrix.target }}
+
+          - name: Install dependencies
+            run: npm install --build-from-source
+
+          - name: Build
+            run: npm run build
+
+          - name: upload binaries to artifacts
+            uses: actions/upload-artifact@v3
+            with:
+              name: prebuilt-binaries
+              path: prebuilt/*
+              retention-days: 7
+
+          - name: upload binaries to github release
+            uses: actions/upload-release-asset@v1
+            with:
+              upload_url: ${{ github.event.release.upload_url }}
+              asset_path: prebuilt/*
+              asset_name: ${{ github.event.release.tag_name }}-${{ matrix.os }}-${{ matrix.host }}-${{ matrix.target }}.zip
+              asset_content_type: application/zip
+              token: ${{ secrets.GITHUB_TOKEN }}

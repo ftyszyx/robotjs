@@ -33,5 +33,8 @@
   "homepage": "https://github.com/octalmage/robotjs",
   "dependencies": {
     "node-addon-api": "*"
+  },
+  "devDependencies": {
+    "@mapbox/node-pre-gyp": "^1.0.11"
   }
 }

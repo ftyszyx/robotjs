@@ -1,60 +1,60 @@
-name: build
 on:
   workflow_dispatch:
-  env:
-    FORCE_COLOR: 1
-    jos:
-      build:
-        run-on: ${{ matrix.os }}
-        strategy:
-          matrix:
-            os: [ubuntu-latest, windows-latest, macos-latest]
-            host: [x64]
-            target: [x64]
-            node: [20]
-            include:
-              - os: windows-latest
-                host: x86
-                target: x86
-                node: 20
-              - os: macos-m1
-                host: arm64
-                target: arm64
-                node: 20
-        name: os=${{ matrix.os }}  host=${{ matrix.host }}, target=${{ matrix.target }}
-        steps:
-          - uses: actions/checkout@v4
+name: build
+permissions:
+  contents: write
+jos:
+  build:
+    run-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        host: [x64]
+        target: [x64]
+        node: [20]
+        include:
+          - os: windows-latest
+            host: x86
+            target: x86
+            node: 20
+          - os: macos-m1
+            host: arm64
+            target: arm64
+            node: 20
+    name: os=${{ matrix.os }}  host=${{ matrix.host }}, target=${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@v4
 
-          - uses: actions/setup-node@v4
-            with:
-              node-version: ${{ matrix.node }}
-              architecture: ${{ matrix.host }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          architecture: ${{ matrix.host }}
 
-          - name: add setuptools for python 3.12
-            if: matrix.os != 'macos-m1'
-            run: pip install setuptools
+      - name: add setuptools for python 3.12
+        if: matrix.os != 'macos-m1'
+        run: pip install setuptools
 
-          - name: Add msbuild to PATH
-            uses: microsoft/setup-msbuild@v1.3
-            if: contains(matrix.os, 'windows')
-            with:
-              msbuild-architecture: ${{ matrix.target }}
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.3
+        if: contains(matrix.os, 'windows')
+        with:
+          msbuild-architecture: ${{ matrix.target }}
 
-          - name: Install dependencies
-            run: npm install --build-from-source
+      - name: Install dependencies
+        run: npm install --build-from-source
 
-          - name: Build
-            run: npm run pack
+      - name: Build
+        run: npm run pack
 
-          - name: Archive
-            run: zip -r dist.zip lib/binding/*
+      - name: Archive
+        run: zip -r dist.zip lib/binding/*
 
-          - name: upload binaries to github release
-            uses: actions/upload-release-asset@v1
-            env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            with:
-              upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-              asset_path: ./dist.zip
-              asset_name: robotjs_addon-${{ matrix.os }}-${{ matrix.host }}-${{ matrix.target }}.zip
-              asset_content_type: application/zip
+      - name: upload binaries to github release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./dist.zip
+          asset_name: robotjs_addon-${{ matrix.os }}-${{ matrix.host }}-${{ matrix.target }}.zip
+          asset_content_type: application/zip

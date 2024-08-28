@@ -9,7 +9,7 @@
     "build": "node-gyp configure &&node-gyp rebuild",
     "install": "node-pre-gyp install --fallback-to-build",
     "pack": "node-pre-gyp package",
-    "publish":"node-pre-gyp-github publish",
+    "publish": "node pub_github.js publish --release",
     "clean": "node-gyp clean"
   },
   "binary": {
@@ -21,19 +21,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/octalmage/robotjs.git"
+    "url": "https://github.com/ftyszyx/robotjs.git"
   },
   "keywords": [],
   "author": "Jason Stallings",
   "license": "MIT",
   "gypfile": true,
-  "bugs": {
-    "url": "https://github.com/octalmage/robotjs/issues"
-  },
-  "homepage": "https://github.com/octalmage/robotjs",
+  "homepage": "https://github.com/ftyszyx/robotjs",
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.11",
-    "node-addon-api": "*",
-    "node-pre-gyp-github": "^2.0.0"
+    "node-addon-api": "*"
+  },
+  "devDependencies": {
+    "@octokit/rest": "2l.0.2",
+    "commander": "12.0.0"
   }
 }

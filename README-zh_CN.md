@@ -36,7 +36,29 @@ npm install --build-from-source
 npm pack
 ···
 
+# 发布包
+
+首先要有 npm 账号
+https://www.npmjs.com/ 注册账号
+
+npm adduser 此时要关掉代理
+npm 会跳转 npm 官网登陆
+
 上传 github
+
+配置环境变量
+
+NODE_PRE_GYP_GITHUB_TOKEN
+
+Within GitHub, create a new authorization:
+
+go to Settings -> Developer settings
+click Personal access tokens
+click Generate new token
+Select public_repo and repo_deployment
+Generate Token
+copy the key that's generated and set NODE_PRE_GYP_GITHUB_TOKEN environment variable to it. Within your command prompt:
+SET NODE_PRE_GYP_GITHUB_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 ```
 npm publish

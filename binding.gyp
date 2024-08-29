@@ -9,7 +9,6 @@
       "cflags": [
         "-Wall",
         "-Wparentheses",
-        "-Winline",
         "-Wbad-function-cast",
         "-Wdisabled-optimization"
       ],
@@ -26,7 +25,7 @@
               "System/Library/Frameworks/CoreFoundation.Framework/Headers",
               "System/Library/Frameworks/Carbon.Framework/Headers",
               "System/Library/Frameworks/ApplicationServices.framework/Headers",
-              "System/Library/Frameworks/OpenGL.framework/Headers",
+              "System/Library/Frameworks/OpenGL.framework/Headers"
             ],
             "link_settings": {
               "libraries": [

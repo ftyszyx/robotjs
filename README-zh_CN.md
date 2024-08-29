@@ -178,3 +178,7 @@ $ sudo yum install xorg-x11\*
 [node-pre-gyp](https://github.com/mapbox/node-pre-gyp)
 
 [robotjs](https://www.npmjs.com/package/robotjs)
+
+# 结语
+
+有问题可以提issue,一起进步

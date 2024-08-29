@@ -9,7 +9,7 @@
     "build": "node-gyp configure &&node-gyp rebuild",
     "install": "node-pre-gyp install --fallback-to-build",
     "pack": "node-pre-gyp package",
-    "publish": "node pub_github.js publish --release",
+    "release": "node pub_github.js publish --release",
     "clean": "node-gyp clean"
   },
   "binary": {

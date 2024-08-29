@@ -71,7 +71,7 @@ https://github.com/nodejs/node-addon-api
 
 # 遇到的问题记录
 
-linux 编译时报错
+问题 1:linux 编译时报错
 
 ···
 ../node_modules/node-addon-api/napi-inl.h:2464:34: error: cannot bind non-const lvalue reference of type ‘Napi::CallbackInfo&’ to an rvalue of type ‘Napi::CallbackInfo’
@@ -81,3 +81,13 @@ linux 编译时报错
 Napi::Object node_getMousePos(Napi::CallbackInfo &info)
 的参数要加 const
 Napi::Object node_getMousePos(const Napi::CallbackInfo &info)
+
+问题 2:
+
+```
+./src/mouse.c:12:10: fatal error: X11/extensions/XTest.h: No such file or directory
+```
+
+网上说要安装库
+
+sudo apt-get install libx11-dev

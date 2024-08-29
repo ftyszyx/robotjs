@@ -24,7 +24,7 @@ int keyboardDelay = 10;
 // tools
 MMMouseButton getMouseButton(const Napi::CallbackInfo &info, int index)
 {
-	if (info.Length() >= index + 1 && info[index].IsString())
+	if ((int)info.Length() >= index + 1 && info[index].IsString())
 	{
 		std::string str = info[index].As<Napi::String>().Utf8Value();
 		if (str == "right")
@@ -239,7 +239,7 @@ MMKeyCode getKeyCodeFromArg(Napi::CallbackInfo &info, int index)
 {
 	Napi::Env env = info.Env();
 	MMKeyCode key = -1;
-	if (info.Length() >= index + 1)
+	if ((int)info.Length() >= index + 1)
 	{
 		Napi::Value arg = info[index];
 		if (!arg.IsString())
@@ -265,7 +265,7 @@ MMKeyFlags getKeyModifiedByArg(Napi::CallbackInfo &info, int index)
 	Napi::Env env = info.Env();
 	MMKeyFlags flags = MOD_NONE;
 	std::list<std::string> modify_strs;
-	if (info.Length() >= index + 1)
+	if ((int)info.Length() >= index + 1)
 	{
 		Napi::Value arg = info[index];
 		if (!arg.IsString() && !arg.IsArray())
@@ -351,7 +351,6 @@ void CheckCallback(Napi::CallbackInfo &info)
 // mouse
 void node_dragMouse(const Napi::CallbackInfo &info)
 {
-	Napi::Env env = info.Env();
 	ScreenPos pos = GetPosByArg(info);
 	MMMouseButton button = LEFT_BUTTON;
 	MMSignedPoint point;
@@ -362,13 +361,11 @@ void node_dragMouse(const Napi::CallbackInfo &info)
 
 void node_updateScreenMetrics(const Napi::CallbackInfo &info)
 {
-	Napi::Env env = info.Env();
 	updateScreenMetrics();
 }
 
 void node_moveMouse(const Napi::CallbackInfo &info)
 {
-	Napi::Env env = info.Env();
 	MMSignedPoint point;
 	ScreenPos pos = GetPosByArg(info);
 	point = MMSignedPointMake(pos.x, pos.y);
@@ -378,7 +375,6 @@ void node_moveMouse(const Napi::CallbackInfo &info)
 
 void node_moveMouseSmooth(const Napi::CallbackInfo &info)
 {
-	Napi::Env env = info.Env();
 	double speed = 3.0;
 	ScreenPos pos = GetPosByArg(info);
 	MMPoint point;
@@ -464,7 +460,6 @@ void node_keytap(Napi::CallbackInfo &info)
 
 void node_keyToggle(Napi::CallbackInfo &info)
 {
-	Napi::Env env = info.Env();
 	MMKeyCode key = getKeyCodeFromArg(info, 0);
 	MMKeyFlags flags = getKeyModifiedByArg(info, 2);
 	bool down = false;
@@ -481,7 +476,6 @@ void node_keyToggle(Napi::CallbackInfo &info)
 
 void node_typeString(Napi::CallbackInfo &info)
 {
-	Napi::Env env = info.Env();
 	std::string type_str;
 	GetStrByArg(info, 0, type_str);
 	typeStringDelayed(type_str.c_str(), 10);

@@ -48,4 +48,6 @@ jobs:
         run: npm run pack
 
       - name: release
+        env:
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run release

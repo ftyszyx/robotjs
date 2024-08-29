@@ -90,4 +90,7 @@ Napi::Object node_getMousePos(const Napi::CallbackInfo &info)
 
 网上说要安装库
 
-sudo apt-get install libx11-dev
+ubuntu:
+$ sudo apt-get install xorg-dev
+centeros
+$ sudo yum install xorg-x11\*

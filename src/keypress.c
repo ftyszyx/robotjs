@@ -316,7 +316,7 @@ void unicodeTap(const unsigned value)
 
 void typeStringDelayed(const char *str, const unsigned mspc)
 {
-	unsigned long n;
+	unsigned long n=0;
 	unsigned short c;
 	unsigned short c1;
 	unsigned short c2;

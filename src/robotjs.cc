@@ -235,7 +235,7 @@ int CheckKeyFlags(const char *f, MMKeyFlags *flags)
 	return 0;
 }
 
-MMKeyCode getKeyCodeFromArg(Napi::CallbackInfo &info, int index)
+MMKeyCode getKeyCodeFromArg(const Napi::CallbackInfo &info, int index)
 {
 	Napi::Env env = info.Env();
 	MMKeyCode key = -1;
@@ -260,7 +260,7 @@ MMKeyCode getKeyCodeFromArg(Napi::CallbackInfo &info, int index)
 	return key;
 }
 
-MMKeyFlags getKeyModifiedByArg(Napi::CallbackInfo &info, int index)
+MMKeyFlags getKeyModifiedByArg(const Napi::CallbackInfo &info, int index)
 {
 	Napi::Env env = info.Env();
 	MMKeyFlags flags = MOD_NONE;
@@ -325,10 +325,10 @@ ScreenPos GetPosByArg(const Napi::CallbackInfo &info)
 	return pos_info;
 }
 
-void GetStrByArg(Napi::CallbackInfo &info, int index, std::string &out)
+void GetStrByArg(const Napi::CallbackInfo &info, int index, std::string &out)
 {
 	Napi::Env env = info.Env();
-	if (info.Length() >= index + 1)
+	if ((int)info.Length() >= index + 1)
 	{
 		if (!info[index].IsString())
 		{
@@ -338,7 +338,7 @@ void GetStrByArg(Napi::CallbackInfo &info, int index, std::string &out)
 	}
 }
 
-void CheckCallback(Napi::CallbackInfo &info)
+void CheckCallback(const Napi::CallbackInfo &info)
 {
 	Napi::Env env = info.Env();
 	if (info.Length() > 1 && info[info.Length() - 1].IsFunction())
@@ -387,7 +387,7 @@ void node_moveMouseSmooth(const Napi::CallbackInfo &info)
 	microsleep(mouseDelay);
 }
 
-Napi::Object node_getMousePos(Napi::CallbackInfo &info)
+Napi::Object node_getMousePos(const Napi::CallbackInfo &info)
 {
 	Napi::Env env = info.Env();
 	MMPoint pos = getMousePos();
@@ -418,7 +418,7 @@ void node_mouseClick(const Napi::CallbackInfo &info)
 	microsleep(mouseDelay);
 }
 
-void node_mouseToggle(Napi::CallbackInfo &info)
+void node_mouseToggle(const Napi::CallbackInfo &info)
 {
 	Napi::Env env = info.Env();
 	MMMouseButton button = getMouseButton(info, 1);
@@ -435,7 +435,7 @@ void node_mouseToggle(Napi::CallbackInfo &info)
 	microsleep(mouseDelay);
 }
 
-void node_setMouseDelay(Napi::CallbackInfo &info)
+void node_setMouseDelay(const Napi::CallbackInfo &info)
 {
 	Napi::Env env = info.Env();
 	if (info.Length() != 1 || !info[0].IsNumber())
@@ -446,9 +446,8 @@ void node_setMouseDelay(Napi::CallbackInfo &info)
 }
 
 // keyboard
-void node_keytap(Napi::CallbackInfo &info)
+void node_keytap(const Napi::CallbackInfo &info)
 {
-	Napi::Env env = info.Env();
 	MMKeyCode key = getKeyCodeFromArg(info, 0);
 	MMKeyFlags flags = getKeyModifiedByArg(info, 1);
 	toggleKeyCode(key, true, flags);
@@ -458,7 +457,7 @@ void node_keytap(Napi::CallbackInfo &info)
 	CheckCallback(info);
 }
 
-void node_keyToggle(Napi::CallbackInfo &info)
+void node_keyToggle(const Napi::CallbackInfo &info)
 {
 	MMKeyCode key = getKeyCodeFromArg(info, 0);
 	MMKeyFlags flags = getKeyModifiedByArg(info, 2);
@@ -474,7 +473,7 @@ void node_keyToggle(Napi::CallbackInfo &info)
 	CheckCallback(info);
 }
 
-void node_typeString(Napi::CallbackInfo &info)
+void node_typeString(const Napi::CallbackInfo &info)
 {
 	std::string type_str;
 	GetStrByArg(info, 0, type_str);
@@ -482,7 +481,7 @@ void node_typeString(Napi::CallbackInfo &info)
 	CheckCallback(info);
 }
 
-void node_SetKeyboardDelay(Napi::CallbackInfo &info)
+void node_SetKeyboardDelay(const Napi::CallbackInfo &info)
 {
 	Napi::Env env = info.Env();
 	if (info.Length() != 1 || !info[0].IsNumber())
@@ -499,7 +498,7 @@ void padHex(MMRGBHex color, char *hex)
 	snprintf(hex, 7, "%06x", color);
 }
 
-Napi::Object node_getScreenSize(Napi::CallbackInfo &info)
+Napi::Object node_getScreenSize(const Napi::CallbackInfo &info)
 {
 	MMSize displaySize = getMainDisplaySize();
 	Napi::Env env = info.Env();

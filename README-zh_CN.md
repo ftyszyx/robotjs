@@ -64,3 +64,20 @@ SET NODE_PRE_GYP_GITHUB_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 npm publish
 
 ```
+
+# node addon
+
+https://github.com/nodejs/node-addon-api
+
+# 遇到的问题记录
+
+linux 编译时报错
+
+···
+../node_modules/node-addon-api/napi-inl.h:2464:34: error: cannot bind non-const lvalue reference of type ‘Napi::CallbackInfo&’ to an rvalue of type ‘Napi::CallbackInfo’
+···
+
+原因是
+Napi::Object node_getMousePos(Napi::CallbackInfo &info)
+的参数要加 const
+Napi::Object node_getMousePos(const Napi::CallbackInfo &info)

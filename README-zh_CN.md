@@ -24,73 +24,157 @@
 
 # 使用
 
-安装依赖
+## 安装依赖
+`
+npm install robotjs_addon
+`
 
-···
+## 调用
+
+```
+const robot = require("robotjs_addon");
+
+robot.typeString("Hello World");
+
+robot.keyTap("enter");
+
+```
+
+# 支持接口如下
+```
+export function setKeyboardDelay(ms: number): void
+
+export function setMouseDelay(delay: number): void
+
+export function getScreenSize(): { width: number; height: number }
+
+export function updateScreenMetrics(): void
+
+
+//keyboard
+
+export function keyTap(key: string, modifier?: string | string[]): void
+
+export function keyToggle(key: string, down: string, modifier?: string | string[]): void
+
+export function typeString(string: string): void
+
+//mouse
+
+export function dragMouse(x: number, y: number): void
+
+export function moveMouse(x: number, y: number): void
+
+export function moveMouseSmooth(x: number, y: number, speed?: number): void
+
+export function mouseClick(button?: MouseButton, double?: boolean): void
+
+export function mouseToggle(down?: boolean, button?: MouseButton): void
+
+export function getMousePos(): { x: number; y: number }
+
+```
+
+## 其它
+
+本库已经为windows/linux/mac预编译了，安装时不需要c++编译环境
+
+
+# 定制开发说明
+
+## 安装依赖
+
+```
 npm install --build-from-source
-···
+```
 
-打包
+## 打包
 
-···
-npm pack
-···
+```
+npm run pack
+```
 
-# 发布包
+## 发布包
 
-首先要有 npm 账号
-https://www.npmjs.com/ 注册账号
+使用了 [node-pre-gyp-github](https://www.npmjs.com/package/node-pre-gyp-github)的代码
 
-npm adduser 此时要关掉代理
-npm 会跳转 npm 官网登陆
-
-上传 github
-
-配置环境变量
-
-NODE_PRE_GYP_GITHUB_TOKEN
-
-Within GitHub, create a new authorization:
+这里只是说明一下，已经集成到了github_action
+ 
+### 首先要有github token
 
 go to Settings -> Developer settings
+
 click Personal access tokens
+
 click Generate new token
+
 Select public_repo and repo_deployment
+
 Generate Token
+
 copy the key that's generated and set NODE_PRE_GYP_GITHUB_TOKEN environment variable to it. Within your command prompt:
+
 SET NODE_PRE_GYP_GITHUB_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+设置完环境变量NODE_PRE_GYP_GITHUB_TOKEN后就可以发布了
+ 
 ```
-npm publish
+npm run release
 
 ```
 
-# node addon
+# github_action说明
 
-https://github.com/nodejs/node-addon-api
+## build.yml
+
+负责编译各个平台的node module，并上传 github release
+
+## pub_npm.yml
+
+负责打包npm package并上传npm registry
 
 # 遇到的问题记录
 
-问题 1:linux 编译时报错
+## 问题 1:linux 编译时报错
 
-···
+```
 ../node_modules/node-addon-api/napi-inl.h:2464:34: error: cannot bind non-const lvalue reference of type ‘Napi::CallbackInfo&’ to an rvalue of type ‘Napi::CallbackInfo’
-···
+```
 
 原因是
+
 Napi::Object node_getMousePos(Napi::CallbackInfo &info)
+
 的参数要加 const
+
 Napi::Object node_getMousePos(const Napi::CallbackInfo &info)
 
-问题 2:
+## 问题 2:
 
 ```
 ./src/mouse.c:12:10: fatal error: X11/extensions/XTest.h: No such file or directory
 ```
 
 网上说要安装库
-
+```
 ubuntu:
+
 $ sudo apt-get install xorg-dev
+
 centeros
+
 $ sudo yum install xorg-x11\*
+```
+
+
+# 参考
+
+[node-addon-api](https://github.com/nodejs/node-addon-api)
+
+[node-gyp-github](https://www.npmjs.com/package/node-pre-gyp-github)
+
+[node-sqlite3](https://github.com/TryGhost/node-sqlite3)
+
+[node-pre-gyp](https://github.com/mapbox/node-pre-gyp)
+
+[robotjs](https://www.npmjs.com/package/robotjs)

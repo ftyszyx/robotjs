@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ftyszyx/robotjs.git"
+    "url": "git+https://github.com/ftyszyx/robotjs.git"
   },
   "keywords": [],
   "author": "Jason Stallings",

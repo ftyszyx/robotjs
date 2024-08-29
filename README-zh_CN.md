@@ -1,6 +1,10 @@
+# robotjs_addon
+
+robotjs node-api 封装
+
 · 中文· [English](./README.md)
 
-# 说明
+## 说明
 
 这个项目是从 robot.js：https://robotjs.io/ fork 过来的。
 主要目的如下：
@@ -17,19 +21,18 @@
 
 4、方便查 bug 和定制，也顺序学习一下 node addon 的知识
 
-# 修改如下：
+## 修改如下：
 
 1. 删除了一些没有用的接口。
 2. 去掉了很多测试用例，感觉这些测试用例只是检查接口调用有没有异常，并不能真正的测试接口是否正确，有点鸡肋。后面有可能全部删除。
 
-# 使用
+## 使用
 
-## 安装依赖
-`
-npm install robotjs_addon
-`
+### 安装依赖
 
-## 调用
+`npm install robotjs_addon`
+
+### 调用
 
 ```
 const robot = require("robotjs_addon");
@@ -40,7 +43,8 @@ robot.keyTap("enter");
 
 ```
 
-# 支持接口如下
+## 支持接口如下
+
 ```
 export function setKeyboardDelay(ms: number): void
 
@@ -75,32 +79,31 @@ export function getMousePos(): { x: number; y: number }
 
 ```
 
-## 其它
+### 其它
 
-本库已经为windows/linux/mac预编译了，安装时不需要c++编译环境
+本库已经为 windows/linux/mac 预编译了，安装时不需要 c++编译环境
 
+## 定制开发说明
 
-# 定制开发说明
-
-## 安装依赖
+### 安装依赖
 
 ```
 npm install --build-from-source
 ```
 
-## 打包
+### 打包
 
 ```
 npm run pack
 ```
 
-## 发布包
+### 发布包
 
 使用了 [node-pre-gyp-github](https://www.npmjs.com/package/node-pre-gyp-github)的代码
 
-这里只是说明一下，已经集成到了github_action
- 
-### 首先要有github token
+这里只是说明一下，已经集成到了 github_action
+
+#### 首先要有 github token
 
 go to Settings -> Developer settings
 
@@ -116,26 +119,26 @@ copy the key that's generated and set NODE_PRE_GYP_GITHUB_TOKEN environment vari
 
 SET NODE_PRE_GYP_GITHUB_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-设置完环境变量NODE_PRE_GYP_GITHUB_TOKEN后就可以发布了
- 
+设置完环境变量 NODE_PRE_GYP_GITHUB_TOKEN 后就可以发布了
+
 ```
 npm run release
 
 ```
 
-# github_action说明
+## github_action 说明
 
-## build.yml
+### build.yml
 
-负责编译各个平台的node module，并上传 github release
+负责编译各个平台的 node module，并上传 github release
 
-## pub_npm.yml
+### pub_npm.yml
 
-负责打包npm package并上传npm registry
+负责打包 npm package 并上传 npm registry
 
-# 遇到的问题记录
+## 遇到的问题记录
 
-## 问题 1:linux 编译时报错
+### 问题 1:linux 编译时报错
 
 ```
 ../node_modules/node-addon-api/napi-inl.h:2464:34: error: cannot bind non-const lvalue reference of type ‘Napi::CallbackInfo&’ to an rvalue of type ‘Napi::CallbackInfo’
@@ -149,13 +152,14 @@ Napi::Object node_getMousePos(Napi::CallbackInfo &info)
 
 Napi::Object node_getMousePos(const Napi::CallbackInfo &info)
 
-## 问题 2:
+### 问题 2:
 
 ```
 ./src/mouse.c:12:10: fatal error: X11/extensions/XTest.h: No such file or directory
 ```
 
 网上说要安装库
+
 ```
 ubuntu:
 
@@ -166,8 +170,7 @@ centeros
 $ sudo yum install xorg-x11\*
 ```
 
-
-# 参考
+## 参考
 
 [node-addon-api](https://github.com/nodejs/node-addon-api)
 
@@ -179,6 +182,6 @@ $ sudo yum install xorg-x11\*
 
 [robotjs](https://www.npmjs.com/package/robotjs)
 
-# 结语
+## 结语
 
-有问题可以提issue,一起进步
+有问题可以提 issue,一起进步

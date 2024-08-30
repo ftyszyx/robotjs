@@ -1,6 +1,8 @@
+# robotjs_addon
+
 · English · [中文](./README-zh_CN.md)
 
-# illustrate
+## illustrate
 
 This project is forked from robot.js: https://robotjs.io/.
 The main purposes are as follows:
@@ -17,18 +19,18 @@ The main purposes are as follows:
 
 4. It is convenient for bug checking and customization, and you can also learn the knowledge of node addon in sequence.
 
-# Modify as follows:
+## Modify as follows:
 
 1. Removed some useless interfaces.
 2. A lot of test cases have been removed. I feel that these test cases only check whether there are exceptions in the interface call, and cannot really test whether the interface is correct, which is a bit useless. It is possible to delete them all later.
 
-# use
+## use
 
-## Install dependencies
+### Install dependencies
 
 `npm install robotjs_addon`
 
-## Call
+### Call
 
 ```
 const robot = require("robotjs_addon");
@@ -39,7 +41,7 @@ robot.keyTap("enter");
 
 ```
 
-# The supported interfaces are as follows
+## The supported interfaces are as follows
 
 ```
 export function setKeyboardDelay(ms: number): void
@@ -75,31 +77,31 @@ export function getMousePos(): { x: number; y: number }
 
 ```
 
-## Others
+### Others
 
 This library has been pre-compiled for windows/linux/mac, and does not require a c++ compilation environment during installation.
 
-# Custom development instructions
+## Custom development instructions
 
-## Install dependencies
+### Install dependencies
 
 ```
 npm install --build-from-source
 ```
 
-## Pack
+### Pack
 
 ```
 npm run pack
 ```
 
-## Release package
+### Release package
 
 Code using [node-pre-gyp-github](https://www.npmjs.com/package/node-pre-gyp-github)
 
 This is just to explain, it has been integrated into github_action
 
-### First you need a github token
+#### First you need a github token
 
 go to Settings -> Developer settings
 
@@ -124,17 +126,17 @@ npm run release
 
 # github_action description
 
-## build.yml
+### build.yml
 
 Responsible for compiling node modules for each platform and uploading them to github release
 
-## pub_npm.yml
+### pub_npm.yml
 
 Responsible for packaging npm package and uploading to npm registry
 
-# Record of problems encountered
+## Record of problems encountered
 
-## Question 1: Error when compiling on Linux
+### Question 1: Error when compiling on Linux
 
 ```
 ../node_modules/node-addon-api/napi-inl.h:2464:34: error: cannot bind non-const lvalue reference of type ‘Napi::CallbackInfo&’ to an rvalue of type ‘Napi::CallbackInfo’
@@ -148,7 +150,7 @@ The parameters should be added const
 
 Napi::Object node_getMousePos(const Napi::CallbackInfo &info)
 
-## Question 2:
+### Question 2:
 
 ```
 ./src/mouse.c:12:10: fatal error: X11/extensions/XTest.h: No such file or directory
@@ -166,7 +168,7 @@ centeros
 $ sudo yum install xorg-x11\*
 ```
 
-# refer to
+## refer to
 
 [node-addon-api](https://github.com/nodejs/node-addon-api)
 
@@ -178,6 +180,6 @@ $ sudo yum install xorg-x11\*
 
 [robotjs](https://www.npmjs.com/package/robotjs)
 
-# Conclusion
+## Conclusion
 
 If you have any questions, you can raise an issue and we can make progress together.

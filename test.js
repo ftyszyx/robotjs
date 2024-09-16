@@ -9,4 +9,5 @@ var robot = require("./index");
 //test keyboard
 // robot.typeString("Hello World");
 // robot.keyTap("enter");
-robot.keyTap("space", "control");
+// robot.keyTap("space", "control");
+robot.typeString("你好");

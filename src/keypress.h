@@ -74,6 +74,9 @@ typedef unsigned int MMKeyFlags;
 	/* Sends a Unicode character without modifiers. */
 	void unicodeTap(const unsigned value);
 
+	void typeKeycodeInWin(const char value);
+	void typeKeyCodeStrInWin(const char *value, const unsigned mspc);
+
 /* Macro to convert WPM to CPM integers.
  * (the average English word length is 5.1 characters.) */
 #define WPM_TO_CPM(WPM) (unsigned)(5.1 * WPM)

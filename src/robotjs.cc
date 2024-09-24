@@ -481,6 +481,14 @@ void node_typeString(const Napi::CallbackInfo &info)
 	CheckCallback(info);
 }
 
+void node_typeKeyCodeStringInWin(const Napi::CallbackInfo &info)
+{
+	std::string type_str;
+	GetStrByArg(info, 0, type_str);
+	typeKeyCodeStrInWin(type_str.c_str(), 10);
+	CheckCallback(info);
+}
+
 void node_SetKeyboardDelay(const Napi::CallbackInfo &info)
 {
 	Napi::Env env = info.Env();
@@ -523,6 +531,7 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports)
 	exports.Set(Napi::String::New(env, "typeString"), Napi::Function::New(env, node_typeString));
 	exports.Set(Napi::String::New(env, "setKeyboardDelay"), Napi::Function::New(env, node_SetKeyboardDelay));
 	exports.Set(Napi::String::New(env, "getScreenSize"), Napi::Function::New(env, node_getScreenSize));
+	exports.Set(Napi::String::New(env, "typeKeyCodeStringInWin"), Napi::Function::New(env, node_typeKeyCodeStringInWin));
 	return exports;
 }
 NODE_API_MODULE(robotjs, InitAll)

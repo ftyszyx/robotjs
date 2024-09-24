@@ -314,9 +314,41 @@ void unicodeTap(const unsigned value)
 #endif
 }
 
+void typeKeycodeInWin(const char value)
+{
+#if defined(IS_WINDOWS)
+	INPUT ip;
+	ip.type = INPUT_KEYBOARD;
+	ip.ki.wScan = 0;
+	ip.ki.time = 0;
+	ip.ki.dwExtraInfo = 0;
+
+	// Press the key
+	ip.ki.wVk = VkKeyScan(value);
+	ip.ki.dwFlags = 0; // 0 for key press
+	SendInput(1, &ip, sizeof(INPUT));
+
+	// Release the key
+	ip.ki.dwFlags = KEYEVENTF_KEYUP;
+	SendInput(1, &ip, sizeof(INPUT));
+#endif
+}
+
+void typeKeyCodeStrInWin(const char *value, const unsigned mspc)
+{
+	for (int i = 0; i < strlen(value); i++)
+	{
+		typeKeycodeInWin(value[i]);
+		if (mspc > 0)
+		{
+			microsleep(mspc);
+		}
+	}
+}
+
 void typeStringDelayed(const char *str, const unsigned mspc)
 {
-	unsigned long n=0;
+	unsigned long n = 0;
 	unsigned short c;
 	unsigned short c1;
 	unsigned short c2;

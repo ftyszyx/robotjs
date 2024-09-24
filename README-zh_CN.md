@@ -63,6 +63,9 @@ export function keyToggle(key: string, down: string, modifier?: string | string[
 
 export function typeString(string: string): void
 
+//win only ansi
+export function typeKeyCodeStringInWin(string: string): void;
+
 //mouse
 
 export function dragMouse(x: number, y: number): void
@@ -185,3 +188,9 @@ $ sudo yum install xorg-x11\*
 ## 结语
 
 有问题可以提 issue,一起进步
+
+## 更新日志
+
+2024-07-25 更新
+
+1. 增加 typeKeyCodeStringInWin 接口，支持 qq 密码输入

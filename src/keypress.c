@@ -322,12 +322,26 @@ void typeKeycodeInWin(const char value)
 	ip.ki.wScan = 0;
 	ip.ki.time = 0;
 	ip.ki.dwExtraInfo = 0;
-
+	SHORT vk = VkKeyScan(value);
+	BYTE vkCode = vk & 0xff;   // Extract the virtual-key code
+	BYTE shiftState = vk >> 8; // Extract the shift state
+	if (shiftState & 1)		   // Shift key
+	{
+		ip.ki.wVk = VK_SHIFT;
+		ip.ki.dwFlags = 0; // 0 for key press
+		SendInput(1, &ip, sizeof(INPUT));
+	}
 	// Press the key
 	ip.ki.wVk = VkKeyScan(value);
 	ip.ki.dwFlags = 0; // 0 for key press
 	SendInput(1, &ip, sizeof(INPUT));
 
+	if (shiftState & 1) // Shift key
+	{
+		ip.ki.wVk = VK_SHIFT;
+		ip.ki.dwFlags = KEYEVENTF_KEYUP;
+		SendInput(1, &ip, sizeof(INPUT));
+	}
 	// Release the key
 	ip.ki.dwFlags = KEYEVENTF_KEYUP;
 	SendInput(1, &ip, sizeof(INPUT));

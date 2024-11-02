@@ -46,7 +46,7 @@ jobs:
 
       - name: install x11 dev
         if: contains(matrix.os,'ubuntu')
-        run: sudo apt-get install xorg-dev
+        run: sudo apt-get update && sudo apt-get install xorg-dev
 
       - name: Install dependencies
         run: npm install --build-from-source

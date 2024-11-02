@@ -11,4 +11,7 @@ var robot = require("./index");
 // robot.keyTap("enter");
 // robot.keyTap("space", "control");
 // robot.typeString("你好");
-robot.typeKeyCodeStringInWin("124556abcdefg@COM");
+// robot.typeKeyCodeStringInWin("124556abcdefg@COM");
+console.log(robot.getMousePos());
+robot.moveMouse(2860, -343, 10);
+// robot.moveMouse(2860, 343);

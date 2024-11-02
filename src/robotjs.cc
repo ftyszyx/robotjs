@@ -392,8 +392,8 @@ Napi::Object node_getMousePos(const Napi::CallbackInfo &info)
 	Napi::Env env = info.Env();
 	MMPoint pos = getMousePos();
 	Napi::Object obj = Napi::Object::New(env);
-	obj.Set("x", Napi::Number::New(env, pos.x));
-	obj.Set("y", Napi::Number::New(env, pos.y));
+	obj.Set("x", Napi::Number::New(env, static_cast<int32_t>(pos.x)));
+	obj.Set("y", Napi::Number::New(env, static_cast<int32_t>(pos.y)));
 	return obj;
 }
 

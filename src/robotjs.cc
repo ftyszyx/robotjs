@@ -445,6 +445,22 @@ void node_setMouseDelay(const Napi::CallbackInfo &info)
 	mouseDelay = info[0].As<Napi::Number>().Int32Value();
 }
 
+// took reference from the orginal repo (octalmage/robotjs) scrollMouse function and modified to support newer version of nodejs
+void node_scrollMouse(const Napi::CallbackInfo &info)
+{
+    Napi::Env env = info.Env();
+    if (info.Length() != 2 || !info[0].IsNumber() || !info[1].IsNumber())
+    {
+        Napi::TypeError::New(env, "Expected two number arguments: x and y.").ThrowAsJavaScriptException();
+        return;
+    }
+    int32_t x = info[0].As<Napi::Number>().Int32Value();
+    int32_t y = info[1].As<Napi::Number>().Int32Value();
+    scrollMouse(x, y);
+    microsleep(mouseDelay);
+    CheckCallback(info);
+}
+
 // keyboard
 void node_keytap(const Napi::CallbackInfo &info)
 {
@@ -519,19 +535,22 @@ Napi::Object node_getScreenSize(const Napi::CallbackInfo &info)
 Napi::Object InitAll(Napi::Env env, Napi::Object exports)
 {
 	exports.Set(Napi::String::New(env, "dragMouse"), Napi::Function::New(env, node_dragMouse));
-	exports.Set(Napi::String::New(env, "updateScreenMetrics"), Napi::Function::New(env, node_updateScreenMetrics));
 	exports.Set(Napi::String::New(env, "moveMouse"), Napi::Function::New(env, node_moveMouse));
 	exports.Set(Napi::String::New(env, "moveMouseSmooth"), Napi::Function::New(env, node_moveMouseSmooth));
 	exports.Set(Napi::String::New(env, "getMousePos"), Napi::Function::New(env, node_getMousePos));
 	exports.Set(Napi::String::New(env, "mouseClick"), Napi::Function::New(env, node_mouseClick));
 	exports.Set(Napi::String::New(env, "mouseToggle"), Napi::Function::New(env, node_mouseToggle));
 	exports.Set(Napi::String::New(env, "setMouseDelay"), Napi::Function::New(env, node_setMouseDelay));
+	exports.Set(Napi::String::New(env, "scrollMouse"), Napi::Function::New(env, node_scrollMouse)); // added scrollMouse function
+	
 	exports.Set(Napi::String::New(env, "keyTap"), Napi::Function::New(env, node_keytap));
 	exports.Set(Napi::String::New(env, "keyToggle"), Napi::Function::New(env, node_keyToggle));
 	exports.Set(Napi::String::New(env, "typeString"), Napi::Function::New(env, node_typeString));
-	exports.Set(Napi::String::New(env, "setKeyboardDelay"), Napi::Function::New(env, node_SetKeyboardDelay));
-	exports.Set(Napi::String::New(env, "getScreenSize"), Napi::Function::New(env, node_getScreenSize));
 	exports.Set(Napi::String::New(env, "typeKeyCodeStringInWin"), Napi::Function::New(env, node_typeKeyCodeStringInWin));
+	exports.Set(Napi::String::New(env, "setKeyboardDelay"), Napi::Function::New(env, node_SetKeyboardDelay));
+
+	exports.Set(Napi::String::New(env, "getScreenSize"), Napi::Function::New(env, node_getScreenSize));
+	exports.Set(Napi::String::New(env, "updateScreenMetrics"), Napi::Function::New(env, node_updateScreenMetrics));
 	return exports;
 }
 NODE_API_MODULE(robotjs, InitAll)

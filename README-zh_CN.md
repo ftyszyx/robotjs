@@ -78,6 +78,8 @@ export function mouseClick(button?: MouseButton, double?: boolean): void
 
 export function mouseToggle(down?: boolean, button?: MouseButton): void
 
+export function scrollMouse(x: number, y: number): void
+
 export function getMousePos(): { x: number; y: number }
 
 ```

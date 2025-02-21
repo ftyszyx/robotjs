@@ -452,7 +452,6 @@ void node_scrollMouse(const Napi::CallbackInfo &info)
     if (info.Length() != 2 || !info[0].IsNumber() || !info[1].IsNumber())
     {
         Napi::TypeError::New(env, "Expected two number arguments: x and y.").ThrowAsJavaScriptException();
-        return;
     }
     int32_t x = info[0].As<Napi::Number>().Int32Value();
     int32_t y = info[1].As<Napi::Number>().Int32Value();

@@ -1,4 +1,10 @@
 {
+  # I faced few errors while building the project, so I had to add the following lines to the binding.gyp file (variables)
+  "variables": {
+    "module_path": "lib/binding",
+    "module_name": "robotjs_addon"
+  },
+  
   "targets": [
     {
       "target_name": "robotjs_addon",
